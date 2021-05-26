@@ -1,0 +1,40 @@
+{
+	"name": "ds_ecdc_http_data_source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_http_github",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"sourceBaseURL": {
+					"value": "@dataset().ds_sourceBaseURL",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"ds_sourceRelativeURL": {
+				"type": "string"
+			},
+			"ds_sourceBaseURL": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": {
+					"value": "@dataset().ds_sourceRelativeURL",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

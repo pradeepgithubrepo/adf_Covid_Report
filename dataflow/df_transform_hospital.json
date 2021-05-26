@@ -1,0 +1,68 @@
+{
+	"name": "df_transform_hospital",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_raw_hospital_admission",
+						"type": "DatasetReference"
+					},
+					"name": "HospitalAdmissionSource"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_hospital_lookup_dae",
+						"type": "DatasetReference"
+					},
+					"name": "dateLookup"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_lookup_country",
+						"type": "DatasetReference"
+					},
+					"name": "CountryLookupsource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_hospital_dailystream",
+						"type": "DatasetReference"
+					},
+					"name": "DailyStreamSink"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_weekly_sink",
+						"type": "DatasetReference"
+					},
+					"name": "Weeklysink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SelectReqFields"
+				},
+				{
+					"name": "CountryLookup"
+				},
+				{
+					"name": "SelectReqFields2"
+				},
+				{
+					"name": "SplitDailyandWeekly"
+				},
+				{
+					"name": "AggregateTheDateDimTable"
+				},
+				{
+					"name": "LookupDateDim"
+				}
+			],
+			"script": "source(output(\n\t\tcountry as string,\n\t\tindicator as string,\n\t\tdate as date,\n\t\tyear_week as string,\n\t\tvalue as double,\n\t\tsource as string,\n\t\turl as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> HospitalAdmissionSource\nsource(output(\n\t\tdate_key as string,\n\t\tdate as string,\n\t\tyear as string,\n\t\tmonth as string,\n\t\tday as string,\n\t\tday_name as string,\n\t\tday_of_year as string,\n\t\tweek_of_month as string,\n\t\tweek_of_year as string,\n\t\tmonth_name as string,\n\t\tyear_month as string,\n\t\tyear_week as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> dateLookup\nsource(output(\n\t\tcountry as string,\n\t\tcountry_code_2_digit as string,\n\t\tcountry_code_3_digit as string,\n\t\tcontinent as string,\n\t\tpopulation as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CountryLookupsource\nHospitalAdmissionSource select(mapColumn(\n\t\tcountry,\n\t\tindicator,\n\t\treported_date = date,\n\t\treported_year_week = year_week,\n\t\tvalue,\n\t\tsource\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectReqFields\nSelectReqFields, CountryLookupsource lookup(SelectReqFields@country == CountryLookupsource@country,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> CountryLookup\nCountryLookup select(mapColumn(\n\t\tcountry = SelectReqFields@country,\n\t\tcountry_code_2_digit,\n\t\tcountry_code_3_digit,\n\t\tindicator,\n\t\treported_date,\n\t\treported_year_week,\n\t\tvalue,\n\t\tsource,\n\t\tcontinent,\n\t\tpopulation\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectReqFields2\nSelectReqFields2 split(indicator =='Daily hospital occupancy' || indicator =='Daily ICU occupancy',\n\tdisjoint: false) ~> SplitDailyandWeekly@(DailyStream, WeeklyStream)\ndateLookup aggregate(groupBy({derived_date date} = year+'W-'+lpad(week_of_year,2,'0')),\n\tweek_start_date = min(date),\n\t\tweek_end_date = max(date)) ~> AggregateTheDateDimTable\nSplitDailyandWeekly@WeeklyStream, AggregateTheDateDimTable lookup(reported_year_week == {derived_date date},\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupDateDim\nSplitDailyandWeekly@DailyStream sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DailyStreamSink\nLookupDateDim sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tmapColumn(\n\t\tcountry,\n\t\tcountry_code_2_digit,\n\t\tcountry_code_3_digit,\n\t\tindicator,\n\t\treported_date,\n\t\treported_year_week,\n\t\tvalue,\n\t\tsource,\n\t\tcontinent,\n\t\tpopulation,\n\t\t{derived_date date},\n\t\tweek_start_date,\n\t\tweek_end_date\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Weeklysink"
+		}
+	}
+}

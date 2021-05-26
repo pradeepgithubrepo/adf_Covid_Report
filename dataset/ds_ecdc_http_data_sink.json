@@ -1,0 +1,33 @@
+{
+	"name": "ds_ecdc_http_data_sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adls_covidreportadlspp",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"ds_sinkFileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().ds_sinkFileName",
+					"type": "Expression"
+				},
+				"folderPath": "ecdc",
+				"fileSystem": "raw"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
