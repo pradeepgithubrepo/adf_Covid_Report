@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adfCovidpp"
+		},
+		"ls_adls_covidreportadlspp_accountKey": {
+			"value": ""
+		},
+		"ls_blob_covidreportsapp_connectionString": {
+			"value": ""
+		},
+		"ls_sqldb_connectionString": {
+			"value": ""
+		},
+		"ls_adls_covidreportadlspp_properties_typeProperties_url": {
+			"value": "https://covidreportadlspp.dfs.core.windows.net"
+		},
+		"ls_http_github_properties_typeProperties_url": {
+			"value": "@{linkedService().sourceBaseURL}"
+		},
+		"tr_population_event_properties_typeProperties_scope": {
+			"value": "/subscriptions/5752d228-6856-4914-8673-1cae39b52f96/resourceGroups/covid_rg/providers/Microsoft.Storage/storageAccounts/covidreportsapp"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
