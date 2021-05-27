@@ -5,6 +5,9 @@
 			"referenceName": "ls_blob_covidreportsapp",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "ecdc"
+		},
 		"annotations": [],
 		"type": "Json",
 		"typeProperties": {
