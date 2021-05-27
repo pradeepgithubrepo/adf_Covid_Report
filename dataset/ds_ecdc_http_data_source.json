@@ -19,6 +19,9 @@
 				"type": "string"
 			}
 		},
+		"folder": {
+			"name": "ecdc"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {

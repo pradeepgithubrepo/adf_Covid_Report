@@ -5,6 +5,9 @@
 			"referenceName": "ls_adls_covidreportadlspp",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "ingest"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
